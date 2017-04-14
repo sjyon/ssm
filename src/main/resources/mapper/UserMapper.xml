@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jayon.ssm.mapper.UserMapper">
+	<resultMap id="userMap" type="UserDO">
+		<id column="u_id" property="id" jdbcType="BIGINT" />
+		<result column="u_username" property="userName" jdbcType="VARCHAR" />
+		<result column="u_password" property="password" jdbcType="VARCHAR" />
+		<result column="u_salt" property="salt" jdbcType="VARCHAR" />
+		<result column="u_locked" property="locked" jdbcType="BIT" />
+		<collection property="roles" ofType="RoleDO">
+			<id column="r_id" property="id" />
+			<result column="r_role" property="role" jdbcType="VARCHAR" />
+			<result column="r_desc" property="description" jdbcType="VARCHAR" />
+			<result column="r_avail" property="available" jdbcType="BIT" />
+			<collection property="permissions" ofType="PermissionDO">
+				<id column="p_id" property="id" />
+				<result column="p_perm" property="permission" jdbcType="VARCHAR" />
+				<result column="p_desc" property="description" jdbcType="VARCHAR" />
+				<result column="p_avail" property="available" jdbcType="BIT" />
+			</collection>
+		</collection>
+	</resultMap>
+
+	<insert id="add" useGeneratedKeys="true" keyProperty="id">
+		insert into sys_users(
+			username,
+			password,
+			salt,
+			locked)
+		values(
+			#{userName},
+			#{password},
+			#{salt},
+			#{locked})
+	</insert>
+
+	<update id="update">
+		update sys_users
+		set
+			<if test="userName != null and userName != ''">
+				username = #{userName},
+			</if>
+			<if test="password != null and password != ''">
+				password = #{password},
+			</if>
+			<if test="salt != null and salt != ''">
+				salt = #{salt},
+			</if>
+			<if test="locked != null">
+	 			locked = #{locked}
+			</if>
+		where
+			id = #{id}
+	</update>
+
+	<delete id="delete">
+		delete from
+			sys_users
+		where
+			id = #{id}
+	</delete>
+	
+	<select id="query" resultMap="userMap">
+		select
+			su.id as u_id,
+			su.username as u_username,
+			su.password as u_password,
+			su.salt as u_salt,
+			su.locked as u_locked,
+			sr.id as r_id,
+			sr.role as r_role,
+			sr.description as r_desc,
+			sr.available as r_avail,
+			sp.id as p_id,
+			sp.permission as p_perm,
+			sp.description as p_desc,
+			sp.available as p_avail
+		from
+			sys_users su
+			LEFT JOIN sys_users_roles sur on su.id = sur.user_id
+			LEFT JOIN sys_roles sr on sur.role_id = sr.id
+			LEFT JOIN sys_roles_permissions srp on sr.id = srp.role_id
+			LEFT JOIN sys_permissions sp on srp.permission_id = sp.id
+		<where>
+			<if test="id != null and id != 0">
+				su.id = #{id}
+			</if>
+			<if test="userName != null and userName != ''">
+				and su.username = #{userName}
+			</if>
+			<if test="locked != null">
+				and su.locked = #{locked}
+			</if>
+		</where>
+	</select>
+
+	<insert id="addUserRoles" parameterType="map">
+		insert into
+		sys_users_roles
+		<foreach collection="roleIds" item="roleId" index="index"
+			separator="UNION ALL">
+			select
+				#{userId},
+				#{roleId}
+			from dual
+		</foreach>
+	</insert>
+
+	<delete id="deleteUserRoles" parameterType="map">
+		delete from
+			sys_users_roles
+		where
+			user_id = #{userId}
+			and role_id in
+		<foreach item="roleId" collection="roleIds" open="("
+			separator="," close=")">
+			#{roleId}
+		</foreach>
+	</delete>
+
+	<select id="queryRoles" resultType="java.lang.String">
+		select
+			role
+		from
+			sys_users u,
+			sys_roles r,
+			sys_users_roles ur
+		where
+			u.id = ur.user_id
+			and r.id = ur.role_id
+			and u.username = #{userName}
+	</select>
+
+	<select id="queryPermissioins" resultType="java.lang.String">
+		select
+			permission
+		from
+			sys_users u,
+			sys_roles r,
+			sys_permissions p,
+			sys_users_roles ur,
+			sys_roles_permissions rp
+		where
+			u.id = ur.user_id
+			and r.id = ur.role_id
+			and r.id = rp.role_id
+			and p.id = rp.permission_id
+			and u.username = #{userName}
+	</select>
+
+</mapper>

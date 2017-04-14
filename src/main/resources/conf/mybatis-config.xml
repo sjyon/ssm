@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+	<settings>
+		<!-- 打印查询语句 -->
+		<setting name="logImpl" value="STDOUT_LOGGING" />
+	</settings>
+	<!-- 配置映射类的别名 -->
+	<typeAliases>
+		<typeAlias alias="UserDO" type="com.jayon.ssm.pojo.UserDO" />
+		<typeAlias alias="RoleDO" type="com.jayon.ssm.pojo.RoleDO" />
+		<typeAlias alias="PermissionDO" type="com.jayon.ssm.pojo.PermissionDO" />
+	</typeAliases>
+</configuration>

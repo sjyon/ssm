@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jayon.ssm.mapper.RoleMapper">
+	<resultMap id="roleMap" type="RoleDO">
+		<id column="r_id" property="id" />
+		<result column="r_role" property="role" jdbcType="VARCHAR" />
+		<result column="r_desc" property="description" jdbcType="VARCHAR" />
+		<result column="r_avail" property="available" jdbcType="BIT" />
+		<collection property="permissions" ofType="PermissionDO">
+			<id column="p_id" property="id" />
+			<result column="p_perm" property="permission" jdbcType="VARCHAR" />
+			<result column="p_desc" property="description" jdbcType="VARCHAR" />
+			<result column="p_avail" property="available" jdbcType="BIT" />
+		</collection>
+	</resultMap>
+
+	<insert id="add" useGeneratedKeys="true" keyProperty="id">
+		insert into sys_roles(
+			role, description, available
+		)
+		values(
+			#{role},
+			#{description},
+			#{available}
+		)
+	</insert>
+
+	<delete id="delete">
+		delete from
+			sys_roles
+		where
+			id = #{id}
+	</delete>
+	
+	<select id="query" resultMap="roleMap">
+		select
+			sr.id as r_id,
+			sr.role as r_role,
+			sr.description as r_desc,
+			sr.available as r_avail,
+			sp.id as p_id,
+			sp.permission as p_perm,
+			sp.description as p_desc,
+			sp.available as p_avail
+		from
+			sys_roles sr
+			LEFT JOIN sys_roles_permissions srp on sr.id = srp.role_id
+			LEFT JOIN sys_permissions sp on srp.permission_id = sp.id;
+		<where>
+			<if test="id != null and id != 0">
+				sr.id = #{id}
+			</if>
+			<if test="role != null and role != ''">
+				and sr.role = #{role}
+			</if>
+			<if test="available != null">
+				and sr.available = #{available}
+			</if>
+		</where>
+	</select>
+	
+	<insert id="addRolePermission" parameterType="map">
+		insert into sys_roles_permissions
+			<foreach collection="permissionIds" item="permissionId" index="index" separator="UNION ALL">
+				select 
+					#{roleId},
+					#{permissionId}
+				from dual
+			</foreach>
+	</insert>
+	
+	<delete id="deleteRolePermission" parameterType="map">
+		delete from sys_roles_permissions
+		where 
+			role_id = #{roleId}
+			and permission_id in 
+			<foreach collection="permissionIds" item="permissionId" index="index" open="(" separator="," close=")">
+				#{permissionId}
+			</foreach>
+	</delete>
+
+</mapper>
