@@ -1,4 +1,4 @@
-package com.jayon.ssm.web.mvc;
+package com.jayon.ssm.web.controller;
 
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresRoles;
