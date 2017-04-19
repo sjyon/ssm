@@ -1,8 +1,11 @@
 package com.jayon.ssm.realm;
 
+import java.util.Set;
+
 import org.apache.shiro.authc.*;
 import org.apache.shiro.authz.AuthorizationInfo;
 import org.apache.shiro.authz.SimpleAuthorizationInfo;
+import org.apache.shiro.cache.Cache;
 import org.apache.shiro.realm.AuthorizingRealm;
 import org.apache.shiro.subject.PrincipalCollection;
 import org.apache.shiro.util.ByteSource;
@@ -32,7 +35,6 @@ public class UserRealm extends AuthorizingRealm {
         String username = (String)token.getPrincipal();
 
         UserDO user = userService.findByUsername(username);
-
         if(user == null) {
             throw new UnknownAccountException();//没找到帐号
         }
@@ -53,11 +55,23 @@ public class UserRealm extends AuthorizingRealm {
 
     @Override
     public void clearCachedAuthorizationInfo(PrincipalCollection principals) {
+    	 System.out.println("清除授权的缓存");
+         Cache c = this.getAuthorizationCache();
+         Set<Object> keys = c.keys();
+         for(Object o:keys) {
+             System.out.println("授权缓存:"+o+"-----"+c.get(o)+"----------");
+         }
         super.clearCachedAuthorizationInfo(principals);
     }
 
     @Override
     public void clearCachedAuthenticationInfo(PrincipalCollection principals) {
+    	 System.out.println("清除认证的缓存");
+         Cache c = this.getAuthenticationCache();
+         Set<Object> keys = c.keys();
+         for(Object o:keys) {
+             System.out.println("认证缓存:"+o+"----------"+c.get(o)+"----------");
+         }
         super.clearCachedAuthenticationInfo(principals);
     }
 

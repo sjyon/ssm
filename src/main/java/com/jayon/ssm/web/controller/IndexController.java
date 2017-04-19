@@ -9,7 +9,7 @@ import com.jayon.ssm.web.bind.annotation.CurrentUser;
 @Controller
 public class IndexController {
 	@RequestMapping("/")
-    public String index(@CurrentUser UserDO loginUser, Model model) {
+    public String index(UserDO loginUser, Model model) {
         model.addAttribute("user", loginUser);
         return "index";
     }

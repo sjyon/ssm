@@ -25,8 +25,8 @@ import java.util.Arrays;
 
 import javax.sql.DataSource;
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations = {"classpath:conf/spring-context.xml", 
-		"classpath:conf/spring-shiro-web.xml"})
+@ContextConfiguration(locations = {"classpath:conf/spring-config.xml", 
+		"classpath:conf/spring-shiro.xml"})
 @TransactionConfiguration(defaultRollback = true)
 public class ShiroTest {
 
@@ -119,7 +119,7 @@ public class ShiroTest {
 
         token = new UsernamePasswordToken(u1.getUserName(), password + "1");
         subject.login(token);
-
+        Assert.assertTrue(subject.isAuthenticated());
 
 
 

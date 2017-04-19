@@ -38,6 +38,9 @@ public class UserServiceImpl implements UserService {
      */
     public void changePassword(Long userId, String newPassword) {
         UserDO user = new UserDO();
+        user.setId(userId);
+        List<UserDO> list = userMapper.query(user);
+        user = list.get(0);
         user.setPassword(newPassword);
         passwordHelper.encryptPassword(user);
         userMapper.update(user);
@@ -76,7 +79,8 @@ public class UserServiceImpl implements UserService {
     public UserDO findByUsername(String username) {
     	UserDO user = new UserDO();
     	user.setUserName(username);
-        return userMapper.query(user).size() > 0 ? userMapper.query(user).get(0) : null;
+    	List<UserDO> users = userMapper.query(user);
+        return users.size() > 0 ? users.get(0) : null;
     }
 
     /**
